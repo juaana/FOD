@@ -1,0 +1,6 @@
+1  2.0000000000000000E+002 Apple
+ 3 2 Blabla
+Iphone 11
+2  1.0000000000000000E+002 Samsung
+ 1 2 BLABLA
+Samsung
