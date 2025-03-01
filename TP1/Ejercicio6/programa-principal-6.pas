@@ -1,11 +1,10 @@
 {
-   Realizar un programa para una tienda de celulares, que presente un menú con
-	opciones para:
-	a. Crear un archivo de registros no ordenados de celulares y cargarlo con datos
-	ingresados desde un archivo de texto denominado “celulares.txt”. 
-	Los registros
-	correspondientes a los celulares deben contener: código de celular, nombre,
-	descripción, marca, precio, stock mínimo y stock disponible.
+  6. Agregar al menú del programa del ejercicio 5, opciones para:
+a. Añadir uno o más celulares al final del archivo con sus datos ingresados por
+teclado.
+b. Modificar el stock de un celular dado.
+c. Exportar el contenido del archivo binario a un archivo de texto denominado:
+”SinStock.txt”, con aquellos celulares que tengan stock 0.
    
 }
 program cinco;
@@ -14,12 +13,12 @@ type
 	
 	celular= record
 		codigo: integer;
-		nombre: String;
-		descripcion: cadena;
-		marca: String;
 		precio: real;
+		marca: String;
 		stockMin: integer;
 		stockDis: integer;
+		descripcion: cadena;
+		nombre: String;
 	end;
 	
 	archivo_registros= file of celular;
@@ -30,7 +29,6 @@ var
 	flag: boolean;
 begin
 	flag:= false;
-	seek(aC,0);
 	while (not eof(aC)) do
 	begin
 		Read(aC, cel);
@@ -56,9 +54,10 @@ var
 	flag: boolean;
 begin
 	flag := false;
-	seek(aC,0);
+	
 	Writeln('Ingrese la cadena a buscar');
 	Readln(cadenaBusqueda);
+	Seek(aC, 0);
 	
 	while (not EOF(aC)) do
 	begin
@@ -76,6 +75,96 @@ begin
 end;
 
 
+
+procedure agregarCelular(var aC: archivo_registros);
+var
+	cel: celular;
+begin
+	Seek(aC, FileSize(aC)); // Mueve el puntero al final
+
+	with cel do 
+	begin
+		Writeln('Ingrese el código:');
+		Readln(codigo);
+		Writeln('Ingrese el nombre:');
+		Readln(nombre);
+		Writeln('Ingrese la descripción:');
+		Readln(descripcion);
+		Writeln('Ingrese la marca:');
+		Readln(marca);
+		Writeln('Ingrese el precio:');
+		Readln(precio);
+		Writeln('Ingrese el stock mínimo:');
+		Readln(stockMin);
+		Writeln('Ingrese el stock disponible:');
+		Readln(stockDis);
+	end;
+
+	Write(aC, cel);
+	Writeln('Celular agregado correctamente.');
+end;
+
+procedure modificarStock(var aC: archivo_registros);
+var
+cel: celular;
+flag: boolean;
+nombre: String;
+nuevoStock: integer;
+begin
+	flag:= false;
+	Seek(aC, 0);
+	
+	Writeln('Ingrese el nombre del celular a modificar');
+	Readln(nombre);
+	
+	while (not eof(aC)) and (flag = false) do
+	begin
+		Read(aC, cel);
+
+		if (cel.nombre = nombre) then
+		begin
+			flag:= true;
+			Writeln('Ingrese el nuevo stock disponible:');
+			Readln(nuevoStock);
+			cel.stockDis := nuevoStock;
+
+			Seek(aC, FilePos(aC) - 1); 
+			Write(aC, cel);
+			Writeln('Stock actualizado.');
+		end;
+	end;
+	if (flag = false) then
+	begin
+		Writeln('Celular no encontrado');
+	end;
+	
+	
+end;
+
+procedure exportarSinStock(var aC: archivo_registros);
+var
+	cel: celular;
+	sS: text;
+begin
+	Assign(sS, 'sinStock.txt');
+	Rewrite(sS);
+	Seek(aC, 0);
+	while (not eof(aC)) do
+	begin
+		Read(aC, cel);
+		if (cel.stockDis = 0) then
+			begin
+				Writeln(sS, cel.codigo, cel.precio, cel.marca);
+				Writeln(sS, cel.stockMin, cel.stockDis, cel.descripcion);
+				Writeln(sS, cel.nombre);		
+			end;
+	end;
+	close(sS);
+	Writeln('Archivo exportado con exito');
+
+end;
+
+
 procedure seleccionarOpcion(var aC: archivo_registros);
 var
 	opcion: integer;
@@ -88,12 +177,19 @@ begin
 		Writeln('------------------------------------');
 		Writeln('1. Seleccione 1 para listar todos los celulares con stock menor al mínimo');
 		Writeln('2. Seleccione 2 para buscar un celular por descripción');
+		Writeln('3. Seleccione 3 para ingresar un nuevo celular');
+		Writeln('4. Seleccione 4 para modificar el stock disponible');
+		Writeln('5. Seleccione 5 para exportar los celulares con stock igual 0');
+
 		Writeln('0. Seleccione 0 para finalizar');
 
 		Readln(opcion);
 		case opcion of 
 		1: listarCelularesConStock(aC);
 		2: buscarPorDescripcion(aC);
+		3: agregarCelular(aC);
+		4: modificarStock(aC);
+		5: exportarSinStock(aC);
 		0: Writeln('Programa finalizado');
 		else
 			Writeln('Opción inválida');
@@ -107,33 +203,17 @@ var
 begin
 	while (not eof(aCT)) do
 	begin
-		with cel do 
-		begin
-			Readln(aCT, codigo, precio, marca);
-			Readln(aCT, stockMin, stockDis, descripcion);
-			Readln(aCT, nombre);
-			Write(aC, cel);
-		end;
-	end
-end;
-
-procedure exportar(var aCT: text; var aC: archivo_registros);
-var
-	cel: celular;
-begin
-	Seek(aC, 0);
-	while (not eof(aC)) do
-	begin
-		Read(aC, cel);
-		with cel do 
+		with cel do
 			begin
-			Writeln(aCT, codigo, precio, marca);
-			Writeln(aCT, stockMin, stockDis, descripcion);
-			Writeln(aCT, nombre);
+				Readln(aCT, codigo, precio, marca);
+				Readln(aCT, stockMin, stockDis, descripcion);
+				Readln(aCT, nombre);
+				Write(aC, cel);
 			end;
 	end;
 
 end;
+
 
 		
 var
@@ -152,10 +232,9 @@ BEGIN
 	
 	cargarRegistros(aCT, aC);
 	seleccionarOpcion(aC);
-	exportar(aCT, aC);
 	close(aCT);
 	close(aC);
-	
+	Writeln('Cambios guardados');
 END.
 
 

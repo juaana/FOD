@@ -2,5 +2,5 @@
  3 2 Blabla
 Iphone 11
 2  1.0000000000000000E+002 Samsung
- 1 2 BLABLA
+ 1 0 BLABLA
 Samsung
