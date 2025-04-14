@@ -11,7 +11,8 @@ a. Actualizar el archivo maestro con el archivo detalle, sabiendo que:
 ● Ambos archivos están ordenados por código de producto.
 ● Cada registro del maestro puede ser actualizado por 0, 1 ó más registros del archivo detalle.
 ● El archivo detalle sólo contiene registros que están en el archivo maestro.
-   
+b. Listar en un archivo de texto llamado “stock_minimo.txt” aquellos productos cuyo stock actual 
+esté por debajo del stock mínimo permitido.  
    
 }
 
@@ -36,6 +37,7 @@ type
 	
 	maestro= file of producto;
 	detalle= file of ventas;
+	
 	
 	
 procedure leer(var archivo: detalle; var dato: ventas);
@@ -105,16 +107,42 @@ begin
 	close(aM);
 end;
 
+procedure listarProductosFaltanteStock(var aM: maestro; var aStock: text);
+var
+	regM: producto;
+begin
+	Assign(aStock, 'stock_minimo.txt');
+	Rewrite(aStock);
+	Reset(aM);
+	Writeln('------------------------------');
+	Writeln('Exportando productos faltantes');
+	Writeln('------------------------------');
+	while (not(EOF(aM))) do
+	begin
+		read(aM, regM);
+		if (regM.stock < regM.stockMin) then
+		begin
+			Writeln(aStock,' ' ,regM.codigo,' ' , regM.nombre, ' ' ,regM.precioVenta, ' ' ,regM.stock ,' ' , regM.stockMin);
+		end
+	end;
+	close(aStock);
+	close(aM);
+	Writeln('Productos exportados con éxito');
+	Writeln('------------------------------');
+end;
+
 var
 aM: maestro;
 aD: detalle;
+aStock: text;
 BEGIN
 	Assign(aM, 'archivoMaestro.dat');
 	Assign(aD, 'archivoDetalle.dat');
+	
 	mostrar(aM);
 	actualizar(aD, aM);
 	mostrar(aM);
-	
+	listarProductosFaltanteStock(aM, aStock);
 	
 END.
 
