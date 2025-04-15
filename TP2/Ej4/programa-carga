@@ -1,0 +1,95 @@
+{
+   
+ 
+   
+}
+
+
+program cargaEJ4;
+
+type
+	producto = record
+		codigo: integer;
+		nombre: String[10];
+		descripcion: String[20];
+		stock: integer;
+		stockMin: integer;
+		precio:real;
+	end;
+	
+	productoSuc = record
+		codigo: integer;
+		cantVendida: integer;
+	end;
+	
+	maestro= file of producto;
+	detalle= file of productoSuc;
+	
+procedure cargarMaestro(var aM: maestro);
+var
+	cod: integer;
+	regM: producto;
+begin
+	Rewrite(aM);
+	Writeln('CARGA - ARCHIVO MAESTRO');
+	Writeln('_______________________');
+	Writeln('Ingrese el código del producto');
+	Readln(cod);
+	while (cod <> 0) do
+	begin
+		regM.codigo:= cod;
+		Writeln('Ingrese el nombre del producto');
+		Readln(regM.nombre);
+		Writeln('Ingrese la descripción del producto');
+		Readln(regM.descripcion);
+		Writeln('Ingrese el stock actual del producto');
+		Readln(regM.stock);
+		Writeln('Ingrese el stock mínimo del producto');
+		Readln(regM.stockMin);
+		Writeln('Ingrese el precio del producto');
+		Readln(regM.precio);
+		Writeln('--------------------------------------------');
+		Write(aM, regM);
+		Writeln('Ingrese el código del producto');
+		Readln(cod);
+	end;
+	close(aM);
+end;	
+procedure cargarDetalle(var aD: detalle);
+var
+	cod: integer;
+	regD: productoSuc;
+begin
+	Rewrite(aD);
+	Writeln('CARGA - ARCHIVO DETALLE');
+	Writeln('_______________________');
+	Writeln('Ingrese el codigo del producto');
+	Readln(cod);
+	while (cod <> 0) do
+	begin
+		regD.codigo:= cod;
+		Writeln('Ingrese la cantidad de productos vendidos');
+		Readln(regD.cantVendida);
+		
+		Writeln('--------------------------------------------');
+		Write(aD, regD);
+		Writeln('Ingrese el codigo del producto');
+		Readln(cod);
+	end;
+	close(aD);
+end;	
+	
+var
+	aM: maestro;
+	aD1, aD2, aD3: detalle;
+BEGIN
+	Assign(aM, 'archivocentral.dat');
+	Assign(aD1, 'archivosucursal1.dat');
+	Assign(aD2, 'archivosucursal2.dat');
+	Assign(aD3, 'archivosucursal3.dat');
+	cargarMaestro(aM);
+	cargarDetalle(aD1);
+	cargarDetalle(aD2);
+	cargarDetalle(aD3);
+END.
+

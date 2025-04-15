@@ -1,0 +1,142 @@
+{
+  Se cuenta con un archivo de productos de una cadena de venta de alimentos congelados.
+  De cada producto se almacena: código del producto, nombre, descripción, stock disponible, stock mínimo y precio del producto.
+  Se recibe diariamente un archivo detalle de cada una de las 30 sucursales de la cadena. 
+  Se debe realizar el procedimiento que recibe los 30 detalles y actualiza el stock del archivo maestro. 
+  La información que se recibe en los detalles es: código de producto y cantidad vendida. 
+  
+  Además, se deberá informar en un archivo de texto: nombre de producto, descripción, stock disponible 
+  y precio de aquellos productos que tengan stock disponible por debajo del stock mínimo. 
+  
+  Pensar alternativas sobre realizar el informe en el mismo procedimiento de actualización, 
+  o realizarlo en un procedimiento separado (analizar ventajas/desventajas en cada caso).
+  Nota: todos los archivos se encuentran ordenados por código de productos. 
+  En cada detalle puede venir 0 o N registros de un determinado producto.
+   
+   
+}
+
+
+program EJ4TP2;
+const
+	valoralto= 10000;
+type
+	producto = record
+		codigo: integer;
+		nombre: String[10];
+		descripcion: String[20];
+		stock: integer;
+		stockMin: integer;
+		precio:real;
+	end;
+	
+	productoSuc = record
+		codigo: integer;
+		cantVendida: integer;
+	end;
+	
+	maestro= file of producto;
+	detalle= file of productoSuc;
+	
+procedure leer(var aD: detalle ; var regD: productoSuc);
+begin
+	if (not (EOF(aD))) then
+	begin
+		read(aD, regD);
+	end
+	else
+		begin
+			regD.codigo:= valoralto;
+		end;
+		
+end;
+procedure actualizar(var aM: maestro; var aD:detalle);
+var
+	aux,total: integer;
+	regM: producto;
+	regD: productoSuc;
+	
+begin
+	Writeln('-----------------------');
+	Writeln('Inicio de actualización');
+	Writeln('-----------------------');
+	Reset(aM);
+	Reset(aD);
+	read(aM, regM);
+	leer(aD, regD);
+	while(regD.codigo <> valoralto) do
+	begin
+		aux:= regD.codigo;
+		total:= 0;
+		while(aux = regD.codigo) do
+		begin
+			total:= total + regD.cantVendida;
+			leer(aD, regD);
+		end;
+		while(regM.codigo <> aux) do
+		begin
+			read(aM, regM);
+		end;
+		regM.stock := regM.stock - total; 
+		seek(aM, filepos(aM)-1);
+		write(aM, regM);
+		if (not (EOF(aM))) then
+		begin
+			read(aM, regM);
+		end;
+	end;
+	close(aD);
+	close(aM);
+	Writeln('Fin de actualización');
+	Writeln('-----------------------');
+end;
+
+procedure mostrarProductosFaltantes(var aM: maestro);
+var
+	regM: producto;
+	exp: text;
+begin
+	Writeln('-----------------------');
+	Writeln('Inicio de exportación');
+	Writeln('-----------------------');
+	reset(aM);
+	Assign(exp, 'export.txt');
+	rewrite(exp);
+	while (not (EOF(aM))) do
+	begin
+		read(aM, regM);
+		if (regM.stock < regM.stockMin) then
+		begin
+			Writeln(exp, ' ' , regM.nombre, ' ', regM.descripcion,' ', regM.stock,' ', regM.precio);
+		end;
+	end;
+	close(aM);
+	close(exp);
+	Writeln('-----------------------');
+	Writeln('Fin de exportación');
+	Writeln('-----------------------');
+end;
+
+var
+  aM: maestro;
+  aD: detalle; 
+  i: integer;
+  iStr: string[3];  
+  cantTotal: integer;
+BEGIN
+  cantTotal := 3;
+  i := 1;
+  
+  Assign(aM, 'archivocentral.dat');
+  
+  while i <= cantTotal do
+  begin
+    Str(i, iStr);  // convierte i (integer) a string y lo guarda en iStr
+    Assign(aD, 'archivosucursal' + iStr + '.dat');
+    actualizar(aM, aD);
+    i := i + 1;
+  end;
+  
+  mostrarProductosFaltantes(aM);
+END.
+
