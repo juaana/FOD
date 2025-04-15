@@ -122,7 +122,7 @@ begin
 		read(aM, regM);
 		if (regM.stock < regM.stockMin) then
 		begin
-			Writeln(aStock,' ' ,regM.codigo,' ' , regM.nombre, ' ' ,regM.precioVenta, ' ' ,regM.stock ,' ' , regM.stockMin);
+			Writeln(aStock,' ' ,regM.codigo,' ' , regM.nombre, ' ' ,regM.precioVenta:2:0, ' ' ,regM.stock ,' ' , regM.stockMin);
 		end
 	end;
 	close(aStock);
