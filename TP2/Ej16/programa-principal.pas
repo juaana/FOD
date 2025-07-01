@@ -93,69 +93,70 @@ begin
 end;
 
 
-procedure actualizarMaestro(var m: maestro; var vectorDetalle: vecDetalle);
+procedure actualizarMaestro(var m: maestro; var D: vecDetalle);
 var
-  i, codMax, codMin, max, min: integer;
-  fechaMax, fechaMin: String[10];
-  vectorRegistros: vecInfo;
-  minD: semanarioRegion;
   regM: emisionSemanario;
-  totalVentas:integer;
+  regs: vecInfo;
+  minD: semanarioRegion;
+  totalVentas, maxV, minV: integer;
+  codMax, codMin: integer;
+  fechaMax, fechaMin: string[10];
+  i: integer;
 begin
-    max:= -1;
-    codMax:= 0;
-    fechaMax:= '';
-    min:= 9999;
-    codMin:= 0;
-    fechaMin:= '';
-    reset(m);
-    for i:= 1 to dimF do
-        begin
-            reset(vectorDetalle[i]);
-            leer(vectorDetalle[i], vectorRegistros[i]);
-        end;
-    minimo(vectorDetalle, vectorRegistros, minD);
+  // Inicializar máximos/mínimos
+  maxV := -1;          minV := MaxInt;
+  codMax := 0;         codMin := 0;
+  fechaMax := '';      fechaMin := '';
+
+  // Preparo maestro y detalles
+  reset(m);
+  for i := 1 to dimF do begin
+    reset(D[i]);
+    leer(D[i], regs[i]);
+  end;
+
+  // Traigo el primer mínimo global
+  minimo(D, regs, minD);
+
+  // Recorro todo el maestro
+  while not EOF(m) do begin
     read(m, regM);
-    while(minD.fecha <> VA) do
-        begin
-            while(minD.fecha <> regM.fecha) do
-                read(m, regM);
-            while (NOT(EOF(m))) AND (minD.fecha = regM.fecha) do
-                begin
-                    while(minD.codigo <> regM.codigo) do
-                        read(m, regM);
-                    totalVentas:= 0;
-                    while (not (EOF(m))) AND (minD.fecha = regM.fecha) and (minD.codigo = regM.codigo) do
-                        begin
-                            if(regM.totalEjVendidos >= minD.cantEjVendidos) then
-                                begin
-                                    regM.totalEjVendidos:= regM.totalEjVendidos + minD.cantEjVendidos;
-                                    regM.totalEj:= regM.totalEj - minD.cantEjVendidos;
-                                    totalVentas:= totalVentas + minD.cantEjVendidos;
-                                end;
-                            minimo(vectorDetalle, vectorRegistros, minD);
-                        end;
-                    if(totalVentas > max) then
-                        begin
-                            max:= totalVentas;
-                            fechaMax:= regM.fecha;
-                            codMax:= regM.codigo;
-                        end;
-                    if(totalVentas < min) then
-                        begin
-                            min:= totalVentas;
-                            fechaMin:= regM.fecha;
-                            codMin:= regM.codigo;
-                        end;
-                    seek(m, filepos(m)-1);
-                    write(m, regM);
-                end;    
-        end;
-    writeln('Semanario con mas ventas: Fecha=', fechaMax, ' Codigo=', codMax);
-    writeln('Semanario con menos ventas: Fecha=', fechaMin, ' Codigo=', codMin);
-    close(m);
-    for i:= 1 to dimF do
-        close(vectorDetalle[i]);
+
+    // Si la fecha del maestro es menor al minD, avanzo maestro
+    while (regM.fecha < minD.fecha) do
+      if not EOF(m) then read(m, regM)
+      else Break;
+
+    // Si coincide fecha y código, acumulo:
+    if (regM.fecha = minD.fecha) then begin
+      totalVentas := 0;
+      // Mientras el detalle aporte al mismo emisión
+      while (minD.fecha = regM.fecha) and (minD.codigo = regM.codigo) do begin
+        totalVentas += minD.cantEjVendidos;
+        minimo(D, regs, minD);
+      end;
+
+      // Actualizo el maestro en disco
+      regM.totalEjVendidos := regM.totalEjVendidos + totalVentas;
+      regM.totalEj        := regM.totalEj - totalVentas;
+      seek(m, FilePos(m)-1);
+      write(m, regM);
+      seek(m, FilePos(m));     // avanzo cursor de lectura
+
+      // Ajusto máximos y mínimos
+      if totalVentas > maxV then begin maxV := totalVentas; codMax := regM.codigo; fechaMax := regM.fecha; end;
+      if (totalVentas < minV) and (totalVentas > 0) then begin minV := totalVentas; codMin := regM.codigo; fechaMin := regM.fecha; end;
+    end;
+  end;
+
+  // Cierro todo
+  close(m);
+  for i := 1 to dimF do
+    close(D[i]);
+
+  // Informo
+  writeln('Más ventas -> Fecha: ', fechaMax, '  Código: ', codMax, '  Cant: ', maxV);
+  writeln('Menos ventas -> Fecha: ', fechaMin, '  Código: ', codMin, '  Cant: ', minV);
 end;
 
 
