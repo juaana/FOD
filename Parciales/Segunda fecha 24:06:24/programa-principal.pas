@@ -127,8 +127,6 @@ begin
       // vuelvo un paso para reescribir
       seek(M, FilePos(M)-1);
       write(M, regM);
-      // avanzo el puntero de lectura tras la escritura
-      seek(M, FilePos(M));
     end;
 
     // informe inmediato si supera 15
