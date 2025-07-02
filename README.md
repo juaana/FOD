@@ -1,18 +1,17 @@
 ## 📁 Estructura del Repositorio
 
 Este repositorio contiene la práctica completa de **FOD (Fundamentos de Organización de Datos)**. Está organizado por temas y trabajos prácticos, siguiendo el cronograma habitual de la materia. Cada carpeta contiene ejercicios resueltos en Pascal con nombres descriptivos para facilitar la búsqueda.
-
+```
 ├── TPs/ # Trabajos prácticos organizados por tema
-│ ├── TP0/
-│ ├── TP1/
-│ └── ...
-├── Parciales/ # Resoluciones de parciales y ejercicios similares
-├── Finales/ # Ejercicios tipo final, con resolución y notas
-├── Ejercicios extras/ # Ejercitación adicional y repasos
-├── Archivos txt/ # Archivos .txt usados como entrada/salida de datos
-└── README.md # Esta guía + recursos adicionales
+  ├── TP1/
+  ├── TP2/
+  ├── TP3/
+  ├── TP4/
+  ├── TP4/
+  └── Parciales/ # Resoluciones de parciales y ejercicios similares
 
 
+```
 ---
 
 ## 🧠 Recursos útiles
